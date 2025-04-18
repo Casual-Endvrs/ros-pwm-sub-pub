@@ -9,7 +9,7 @@ source /opt/ros/jazzy/setup.bash
 
 # Local jobs
 cd ./ros2_ws
-colcon build
+colcon build --symlink-install
 
 # Local ws setup
 source ./install/setup.bash
