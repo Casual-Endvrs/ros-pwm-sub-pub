@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "pwm_pub = pwm_pub.PWM_Publisher:main"
         ],
     },
 )
