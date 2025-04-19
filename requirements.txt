@@ -1,0 +1,8 @@
+adafruit-circuitpython-servokit
+lgpio
+PyYAML
+numpy
+
+
+
+
