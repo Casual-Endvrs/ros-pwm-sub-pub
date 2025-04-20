@@ -20,38 +20,50 @@ class MinimalSubscriber(Node):
 
     def listener_callback(self, msg):
         # self.get_logger().info('I heard: "%s"' % msg.data)
-        self.get_logger().info(f'I heard: {msg.data}')
+        # self.get_logger().info(f'I heard: {msg.data}')
 
         # if msg.data[0] < 0 :
-        #     self.ctlr.set_servo_angle_rel(0, -15)
-        # elif msg.data[0] > 0 :
-        #     self.ctlr.set_servo_angle_rel(0, 15)
+        #     self.ctlr.seServoKitt_servo_angle_rel(0, 15)
+
+        #! Calibration
+        # pin = 1
+        # if msg.data[pin] < 0 :
+        #     self.ctlr.set_servo_angle_abs(pin, 0)
+        # elif msg.data[pin] > 0 :
+        #     self.ctlr.set_servo_angle_abs(pin, 180)
+        # else:
+        #     self.ctlr.set_servo_angle_abs(pin, 90)
+
+        step_size = 5
         
         if msg.data[0] != 0 :
-            self.ctlr.set_servo_angle_rel(0, 15*msg.data[0])
+            self.ctlr.set_servo_angle_rel(0, step_size*msg.data[0])
         else:
             self.ctlr.decay_to_neutral(0)
 
-        # if msg.data[1] < 0 :
-        #     self.ctlr.set_servo_angle_rel(1, -15)
-        # elif msg.data[1] > 0 :
-        #     self.ctlr.set_servo_angle_rel(1, 15)
         
         if msg.data[1] != 0 :
-            self.ctlr.set_servo_angle_rel(1, 15*msg.data[1])
+            self.ctlr.set_servo_angle_rel(1, step_size*msg.data[1])
         else:
             self.ctlr.decay_to_neutral(1)
+
+        # print()
+        print( self.ctlr.s_angles[0:2] )
+        # print( msg.data )
 
 class pwm_controller():
     def __init__(self):
         n_servos = 16
 
-        self.ctlr = ServoKit(channels=n_servos, address=0x41)
+        self.ctlr = ServoKit(channels=n_servos, address=0x41, frequency=100)
 
-        self.set_servo_rng(0, 300, 2500)
-        self.set_servo_rng(1, 300, 2500)
+        self.set_servo_rng(0, 967, 1912)
+        self.set_servo_rng(1, 1020, 1956)
 
-        self.s_angles = n_servos * [90]
+        self.s_angles = n_servos * [155]
+
+        self.set_servo_angle_abs(0, 90)
+        self.set_servo_angle_abs(1, 90)
     
     def set_servo_rng(self, s_idx, s_min, s_max):
         self.ctlr.servo[s_idx].set_pulse_width_range(s_min, s_max)
@@ -72,15 +84,33 @@ class pwm_controller():
         self.set_servo_angle_abs(s_idx, new_angle)
     
     def decay_to_neutral(self, s_idx):
-        decay_rate = 5
+        center_angle = 110
+        decay_rate = 10
         curr_angle = self.s_angles[s_idx]
 
-        if np.abs(90-curr_angle) <= 1.1*decay_rate :
+        if np.abs(center_angle-curr_angle) <= 1.1*decay_rate :
+            self.set_servo_angle_abs(s_idx, center_angle)
             return
 
-        dir = 1 if self.s_angles[s_idx]<90 else -1
+        dir = 1 if self.s_angles[s_idx]<center_angle else -1
 
         self.set_servo_angle_rel(s_idx, dir*decay_rate)
+
+
+
+
+
+# from adafruit_pca9685 import PCA9685
+# import board
+
+# i2c = board.I2C()
+
+# pca = PCA9685(i2c)
+# pca.frequency = 60
+# pca.channels[0].duty_cycle = 0x7FFF
+# pca.channels[1].duty_cycle = 0x7FFF
+
+
 
 
 
